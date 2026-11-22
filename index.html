@@ -1,0 +1,366 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <title>Practical Quiz 2 - Classic Room</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <script src="https://aframe.io/releases/1.8.0/aframe.min.js"></script>
+  <script src="script/aframe.js"></script>
+  <style>
+    html, body { margin: 0; touch-action: none; user-select: none; -webkit-user-select: none; }
+  </style>
+
+  <script>
+    function mk(parent, tag, attrs) {
+      const e = document.createElement(tag);
+      for (const k in attrs) e.setAttribute(k, attrs[k]);
+      parent.appendChild(e);
+      return e;
+    }
+
+    AFRAME.registerComponent('chair', {
+      schema: { wood: { default: '#4a2c17' }, fabric: { default: '#7a1f2b' } },
+      init: function () {
+        const e = this.el, d = this.data;
+        mk(e, 'a-box', { width: .5, height: .05, depth: .5, position: '0 .45 0', color: d.wood });
+        mk(e, 'a-box', { width: .44, height: .07, depth: .44, position: '0 .505 0', color: d.fabric });
+        [[-.22, -.22], [.22, -.22], [-.22, .22], [.22, .22]].forEach(p =>
+          mk(e, 'a-cone', { 'radius-bottom': .02, 'radius-top': .03, height: .43,
+            position: p[0] + ' .215 ' + p[1], color: d.wood }));
+        [-.22, .22].forEach(x =>
+          mk(e, 'a-cylinder', { radius: .025, height: .56, position: x + ' .73 .235', color: d.wood }));
+        mk(e, 'a-box', { width: .5, height: .07, depth: .05, position: '0 1.02 .235', color: d.wood });
+        mk(e, 'a-box', { width: .38, height: .3, depth: .035, position: '0 .8 .235', color: d.fabric });
+        mk(e, 'a-box', { width: .38, height: .04, depth: .04, position: '0 .66 .235', color: d.wood });
+      }
+    });
+
+    AFRAME.registerComponent('cup', {
+      init: function () {
+        const e = this.el;
+        mk(e, 'a-cylinder', { radius: .065, height: .008, position: '0 .004 0', color: '#fff' });
+        mk(e, 'a-torus', { radius: .06, 'radius-tubular': .002, rotation: '90 0 0',
+          position: '0 .008 0', color: '#c9a24a' });
+        mk(e, 'a-cylinder', { radius: .035, height: .055, position: '0 .035 0', color: '#fff' });
+        mk(e, 'a-cylinder', { radius: .031, height: .002, position: '0 .06 0', color: '#4b2e1a' });
+        mk(e, 'a-torus', { radius: .035, 'radius-tubular': .003, rotation: '90 0 0',
+          position: '0 .063 0', color: '#c9a24a' });
+        mk(e, 'a-torus', { radius: .011, 'radius-tubular': .002, position: '.038 .036 0', color: '#fff' });
+        mk(e, 'a-box', { width: .07, height: .003, depth: .008, rotation: '0 -25 0',
+          position: '-.03 .01 .035', color: '#c0c0c0' });
+      }
+    });
+
+    AFRAME.registerComponent('vase', {
+      init: function () {
+        const e = this.el, T = AFRAME.THREE;
+        const por = '#f6f8fc', gold = '#c9a24a', blue = '#2e5aa8', green = '#2e7d32';
+        mk(e, 'a-cylinder', { radius: .045, height: .012, position: '0 .006 0', color: gold });
+        mk(e, 'a-cylinder', { radius: .02, height: .03, position: '0 .027 0', color: por });
+        mk(e, 'a-sphere', { radius: .052, scale: '1 1.05 1', position: '0 .09 0', color: por });
+        mk(e, 'a-torus', { radius: .05, 'radius-tubular': .004, rotation: '90 0 0', position: '0 .09 0', color: blue });
+        mk(e, 'a-torus', { radius: .046, 'radius-tubular': .003, rotation: '90 0 0', position: '0 .115 0', color: gold });
+        mk(e, 'a-cylinder', { radius: .025, height: .045, position: '0 .165 0', color: por });
+        mk(e, 'a-torus', { radius: .03, 'radius-tubular': .005, rotation: '90 0 0', position: '0 .19 0', color: gold });
+        const roses = [
+          [0, .33, 0, '#c2185b', '#8e0e3f'], [.06, .30, .03, '#ef7f9b', '#c2527a'],
+          [-.06, .30, .02, '#fdf3f0', '#e6cfc6'], [.03, .29, -.06, '#d32f2f', '#8f1d1d'],
+          [-.04, .28, -.06, '#f8bbd0', '#d98aa8'], [.085, .26, -.02, '#fff0e0', '#e2c9a8'],
+          [-.085, .26, 0, '#e91e63', '#a0123f']
+        ];
+        const deg = 180 / Math.PI;
+        roses.forEach(p => {
+          const a = new T.Vector3(0, .19, 0), b = new T.Vector3(p[0], p[1] - .02, p[2]);
+          const d = b.clone().sub(a), len = d.length(), mid = a.clone().add(b).multiplyScalar(.5);
+          const q = new T.Quaternion().setFromUnitVectors(new T.Vector3(0, 1, 0), d.clone().normalize());
+          const eu = new T.Euler().setFromQuaternion(q);
+          mk(e, 'a-cylinder', { radius: .0025, height: len,
+            position: mid.x + ' ' + mid.y + ' ' + mid.z,
+            rotation: (eu.x * deg) + ' ' + (eu.y * deg) + ' ' + (eu.z * deg), color: green });
+          const r = mk(e, 'a-entity', { position: p[0] + ' ' + p[1] + ' ' + p[2] });
+          mk(r, 'a-sphere', { radius: .03, scale: '1 .85 1', color: p[3] });
+          mk(r, 'a-torus', { radius: .02, 'radius-tubular': .009, rotation: '90 0 0', position: '0 .014 0', color: p[4] });
+          mk(r, 'a-sphere', { radius: .011, position: '0 .02 0', color: p[4] });
+        });
+        for (let i = 0; i < 6; i++) {
+          const ang = i * Math.PI / 3 + .3;
+          mk(e, 'a-sphere', { radius: .035, scale: '1 .1 .45',
+            position: (Math.cos(ang) * .06) + ' ' + (.205 + (i % 2) * .03) + ' ' + (Math.sin(ang) * .06),
+            rotation: '0 ' + (-ang * deg) + ' 15', color: green });
+        }
+        [[.1, .3, .02], [-.1, .29, -.02], [.05, .36, 0], [-.03, .35, .03],
+         [0, .27, .08], [.02, .25, -.09], [-.1, .24, .05], [.11, .25, .04]].forEach(p =>
+          mk(e, 'a-sphere', { radius: .008, position: p[0] + ' ' + p[1] + ' ' + p[2], color: '#ffffff' }));
+      }
+    });
+
+    AFRAME.registerComponent('curtain', {
+      schema: { w: { default: .9 }, c1: { default: '#8c2a3a' }, c2: { default: '#6e1f2d' } },
+      init: function () {
+        const e = this.el, d = this.data, n = 8;
+        for (let i = 0; i < n; i++) {
+          mk(e, 'a-box', { width: d.w / n + .02, height: 2.3, depth: .07,
+            position: ((i - (n - 1) / 2) * d.w / n) + ' 0 ' + (i % 2) * .06,
+            color: i % 2 ? d.c1 : d.c2 });
+        }
+      }
+    });
+
+    AFRAME.registerComponent('floor', {
+      init: function () {
+        for (let i = 0; i < 16; i++) {
+          mk(this.el, 'a-box', { width: .5, height: .02, depth: 8, position: (-3.75 + i * .5) + ' -.01 0',
+            color: i % 2 ? '#8b5e3c' : '#7d5334' });
+        }
+      }
+    });
+
+    AFRAME.registerComponent('rug', {
+      init: function () {
+        const e = this.el;
+        mk(e, 'a-box', { width: 4.6, height: .02, depth: 3.4, position: '0 .02 0', color: '#111111' });
+        mk(e, 'a-box', { width: 4.3, height: .01, depth: 3.1, position: '0 .033 0', color: '#ffffff' });
+        mk(e, 'a-box', { width: 3.9, height: .01, depth: 2.7, position: '0 .043 0', color: '#111111' });
+        mk(e, 'a-cylinder', { radius: .95, height: .01, scale: '1.5 1 1', position: '0 .052 0', color: '#ffffff' });
+        mk(e, 'a-cylinder', { radius: .85, height: .01, scale: '1.5 1 1', position: '0 .058 0', color: '#000000' });
+        for (let i = 0; i < 24; i++) {
+          const x = -2.2 + i * .19;
+          mk(e, 'a-box', { width: .03, height: .01, depth: .14, position: x + ' .01 1.77', color: '#ffffff' });
+          mk(e, 'a-box', { width: .03, height: .01, depth: .14, position: x + ' .01 -1.77', color: '#ffffff' });
+        }
+      }
+    });
+
+    AFRAME.registerComponent('chandelier', {
+      init: function () {
+        const e = this.el;
+        mk(e, 'a-cylinder', { radius: .012, height: .5, position: '0 .25 0', color: '#c9a24a' });
+        mk(e, 'a-torus', { radius: .35, 'radius-tubular': .015, rotation: '90 0 0', color: '#c9a24a' });
+        mk(e, 'a-sphere', { radius: .05, position: '0 -.02 0', color: '#c9a24a' });
+        for (let i = 0; i < 6; i++) {
+          const a = i * Math.PI / 3;
+          mk(e, 'a-sphere', { radius: .035, color: '#fff3c4',
+            material: 'emissive: #ffe9a0; emissiveIntensity: 1',
+            position: Math.cos(a) * .35 + ' .06 ' + Math.sin(a) * .35 });
+        }
+      }
+    });
+
+    AFRAME.registerComponent('rig-controls', {
+      init: function () {
+        this.yaw = 0; this.pitch = 0; this.fov = 75;
+        this.keys = {}; this.tw = null; this.started = false; this.drag = false;
+        this.el.object3D.rotation.order = 'YXZ';
+        window.addEventListener('keydown', e => { this.keys[e.key.toLowerCase()] = true; });
+        window.addEventListener('keyup', e => { this.keys[e.key.toLowerCase()] = false; });
+        window.addEventListener('pointerdown', e => {
+          this.drag = true; this.lx = e.clientX; this.ly = e.clientY;
+        });
+        window.addEventListener('pointermove', e => {
+          if (!this.drag) return;
+          this.tw = null;
+          const k = 0.0045 * (this.fov / 75);
+          this.yaw += (e.clientX - this.lx) * k;
+          this.pitch += (e.clientY - this.ly) * k;
+          this.pitch = Math.max(-1.4, Math.min(1.4, this.pitch));
+          this.lx = e.clientX; this.ly = e.clientY;
+        });
+        window.addEventListener('pointerup', () => { this.drag = false; });
+      },
+      setFov: function (f) {
+        this.fov = f;
+        const cam = this.el.getObject3D('camera');
+        if (cam) { cam.fov = f; cam.updateProjectionMatrix(); }
+      },
+      zoomBy: function (factor) {
+        this.tw = null;
+        this.setFov(Math.max(22, Math.min(100, this.fov * factor)));
+      },
+      aim: function (pos, look) {
+        const dx = look[0] - pos[0], dy = look[1] - pos[1], dz = look[2] - pos[2];
+        return { yaw: Math.atan2(-dx, -dz), pitch: Math.atan2(dy, Math.hypot(dx, dz)) };
+      },
+      setPose: function (pos, look, f) {
+        const a = this.aim(pos, look);
+        this.el.object3D.position.set(pos[0], pos[1], pos[2]);
+        this.yaw = a.yaw; this.pitch = a.pitch;
+        this.setFov(f);
+      },
+      flyTo: function (pos, look, f) {
+        const a = this.aim(pos, look), o = this.el.object3D;
+        let dyaw = a.yaw - this.yaw;
+        dyaw = Math.atan2(Math.sin(dyaw), Math.cos(dyaw));
+        this.tw = { t0: performance.now(), d: 1100,
+          px: o.position.x, py: o.position.y, pz: o.position.z, to: pos,
+          y0: this.yaw, dy: dyaw, p0: this.pitch, p1: a.pitch, f0: this.fov, f1: f };
+      },
+      tick: function (time, delta) {
+        const o = this.el.object3D, dt = Math.min(delta, 50) / 1000;
+        if (!this.started) {
+          if (!this.el.getObject3D('camera')) return;
+          this.setPose([0, 1.6, 3.4], [0, 1.2, -1], 75);
+          this.started = true;
+        }
+        const k = this.keys;
+        if (this.tw) {
+          const T = this.tw;
+          let t = Math.min(1, (performance.now() - T.t0) / T.d);
+          const e = t < .5 ? 2 * t * t : 1 - Math.pow(-2 * t + 2, 2) / 2;
+          o.position.set(T.px + (T.to[0] - T.px) * e, T.py + (T.to[1] - T.py) * e, T.pz + (T.to[2] - T.pz) * e);
+          this.yaw = T.y0 + T.dy * e;
+          this.pitch = T.p0 + (T.p1 - T.p0) * e;
+          this.setFov(T.f0 + (T.f1 - T.f0) * e);
+          if (t >= 1) this.tw = null;
+        } else {
+          let f = 0, s = 0;
+          if (k['w'] || k['arrowup']) f += 1;
+          if (k['s'] || k['arrowdown']) f -= 1;
+          if (k['d']) s += 1;
+          if (k['a']) s -= 1;
+          if (k['arrowleft']) this.yaw += 1.6 * dt;
+          if (k['arrowright']) this.yaw -= 1.6 * dt;
+          if (f || s) {
+            const sp = 2.5 * dt;
+            o.position.x += (-Math.sin(this.yaw) * f + Math.cos(this.yaw) * s) * sp;
+            o.position.z += (-Math.cos(this.yaw) * f - Math.sin(this.yaw) * s) * sp;
+            o.position.x = Math.max(-3.6, Math.min(3.6, o.position.x));
+            o.position.z = Math.max(-3.6, Math.min(3.6, o.position.z));
+          }
+        }
+        o.rotation.set(this.pitch, this.yaw, 0);
+      }
+    });
+
+    function R() { const c = document.querySelector('#cam'); return c && c.components['rig-controls']; }
+    function zoomIn()  { const r = R(); if (r) r.zoomBy(0.8); }
+    function zoomOut() { const r = R(); if (r) r.zoomBy(1.25); }
+    function viewMilo()  { const r = R(); if (r) r.flyTo([-.61, 1.12, .95], [-.61, .88, .17], 40); }
+    function viewFood()  { const r = R(); if (r) r.flyTo([.1, 1.5, 1.35], [.1, .8, 0], 55); }
+    function viewTable() { const r = R(); if (r) r.flyTo([2.6, 1.9, 2.6], [.2, .6, 0], 70); }
+    function viewRoom()  { const r = R(); if (r) r.flyTo([0, 1.6, 3.4], [0, 1.2, -1], 75); }
+
+    window.addEventListener('keydown', e => {
+      const k = e.key;
+      if (k === '+' || k === '=' || k.toLowerCase() === 'z') zoomIn();
+      if (k === '-' || k === '_' || k.toLowerCase() === 'x') zoomOut();
+      if (k === '1') viewMilo();
+      if (k === '2') viewFood();
+      if (k === '3') viewTable();
+      if (k === '4') viewRoom();
+    });
+    window.addEventListener('wheel', e => { e.deltaY < 0 ? zoomIn() : zoomOut(); }, { passive: true });
+  </script>
+</head>
+
+<body>
+  <a-scene background="color: #f3ead7" renderer="antialias: true"
+           vr-mode-ui="enabled: false" device-orientation-permission-ui="enabled: false">
+
+    <a-entity light="type: ambient; color: #fff4e0; intensity: 0.8"></a-entity>
+    <a-entity light="type: directional; color: #fff; intensity: 0.5" position="0 6 4"></a-entity>
+    <a-entity light="type: point; color: #ffe0a0; intensity: 0.7; distance: 9" position="0 2.4 0"></a-entity>
+    <a-entity light="type: point; color: #ffffff; intensity: 0.5; distance: 4" position="0 1.6 1.6"></a-entity>
+
+    <a-entity floor></a-entity>
+    <a-box width="8" height="3" depth=".1" position="0 1.5 -4" color="#f3ead7"></a-box>
+    <a-box width="8" height="3" depth=".1" position="0 1.5 4" color="#f3ead7"></a-box>
+    <a-box width=".1" height="3" depth="8" position="-4 1.5 0" color="#efe3cb"></a-box>
+    <a-box width=".1" height="3" depth="8" position="4 1.5 0" color="#efe3cb"></a-box>
+    <a-box width="8" height=".1" depth="8" position="0 3.05 0" color="#ffffff"></a-box>
+
+    <a-box width="8" height="0.9" depth=".04" position="0 .45 -3.93" color="#ffffff"></a-box>
+    <a-box width=".04" height="0.9" depth="8" position="-3.93 .45 0" color="#ffffff"></a-box>
+    <a-box width=".04" height="0.9" depth="8" position="3.93 .45 0" color="#ffffff"></a-box>
+    <a-box width="8" height=".04" depth=".07" position="0 .92 -3.93" color="#c9a24a"></a-box>
+    <a-box width=".07" height=".04" depth="8" position="-3.93 .92 0" color="#c9a24a"></a-box>
+    <a-box width=".07" height=".04" depth="8" position="3.93 .92 0" color="#c9a24a"></a-box>
+
+    <a-box width="2.2" height="1.6" depth=".05" position="0 1.65 -3.94" color="#ffffff"></a-box>
+    <a-plane width="2.0" height="1.4" position="0 1.65 -3.91" color="#cfe9f7" material="shader: flat"></a-plane>
+    <a-box width=".05" height="1.4" depth=".04" position="0 1.65 -3.9" color="#ffffff"></a-box>
+    <a-box width="2.0" height=".05" depth=".04" position="0 1.65 -3.9" color="#ffffff"></a-box>
+    <a-box width="2.4" height=".06" depth=".2" position="0 .86 -3.85" color="#ffffff"></a-box>
+
+    <a-cylinder radius=".015" height="3.8" rotation="0 0 90" position="0 2.6 -3.78" color="#c9a24a"></a-cylinder>
+    <a-sphere radius=".04" position="-1.9 2.6 -3.78" color="#c9a24a"></a-sphere>
+    <a-sphere radius=".04" position="1.9 2.6 -3.78" color="#c9a24a"></a-sphere>
+    <a-entity curtain="w: .9" position="-1.45 1.4 -3.8"></a-entity>
+    <a-entity curtain="w: .9" position="1.45 1.4 -3.8"></a-entity>
+    <a-box width="3.8" height=".25" depth=".1" position="0 2.6 -3.75" color="#6e1f2d"></a-box>
+
+    <a-box width="1" height="2.1" depth=".06" position="2.5 1.05 3.92" color="#5b3a1e"></a-box>
+    <a-sphere radius=".04" position="2.15 1.05 3.86" color="#c9a24a"></a-sphere>
+
+    <a-box width=".05" height=".9" depth=".7" position="-3.92 1.8 -1.2" color="#c9a24a"></a-box>
+    <a-box width=".06" height=".75" depth=".55" position="-3.9 1.8 -1.2" color="#2e6f95"></a-box>
+    <a-box width=".05" height=".9" depth=".7" position="3.92 1.8 0" color="#c9a24a"></a-box>
+    <a-box width=".06" height=".75" depth=".55" position="3.9 1.8 0" color="#3c8a5a"></a-box>
+
+    <a-box width=".5" height=".8" depth="1.8" position="-3.7 .4 -2.4" color="#3a2212"></a-box>
+    <a-cylinder radius=".07" height=".25" position="-3.7 .93 -2.4" color="#fff"></a-cylinder>
+    <a-cone radius-bottom=".16" radius-top=".08" height=".22" position="-3.7 1.16 -2.4" color="#f5deb3"
+      material="emissive: #f5deb3; emissiveIntensity: .4"></a-cone>
+
+    <a-cone radius-bottom=".14" radius-top=".2" height=".4" position="3.4 .2 -3.4" color="#a0522d"></a-cone>
+    <a-sphere radius=".3" position="3.4 .7 -3.4" color="#2e7d32"></a-sphere>
+    <a-sphere radius=".22" position="3.55 .95 -3.35" color="#3c9a40"></a-sphere>
+    <a-sphere radius=".2" position="3.28 .95 -3.45" color="#2a7030"></a-sphere>
+
+    <a-entity chandelier position="0 2.55 0"></a-entity>
+    <a-entity rug></a-entity>
+
+    <a-entity id="table" position="0 0 0">
+      <a-box width="2.2" height=".06" depth="1.1" position="0 .76 0" color="#4a2c17"></a-box>
+      <a-box width="2.3" height=".02" depth="1.2" position="0 .73 0" color="#3a2212"></a-box>
+      <a-box width="2.0" height=".005" depth=".9" position="0 .7925 0" color="#6b4226"></a-box>
+      <a-box width="2.0" height=".004" depth=".3" position="0 .797 0" color="#f4e1c1"></a-box>
+      <a-box width="2.0" height=".005" depth=".012" position="0 .799 .14" color="#c9a24a"></a-box>
+      <a-box width="2.0" height=".005" depth=".012" position="0 .799 -.14" color="#c9a24a"></a-box>
+
+      <a-box width="2.0" height=".1" depth=".03" position="0 .68 .48" color="#3a2212"></a-box>
+      <a-box width="2.0" height=".1" depth=".03" position="0 .68 -.48" color="#3a2212"></a-box>
+      <a-box width=".03" height=".1" depth=".96" position="-.97 .68 0" color="#3a2212"></a-box>
+      <a-box width=".03" height=".1" depth=".96" position=".97 .68 0" color="#3a2212"></a-box>
+
+      <a-cone radius-bottom=".025" radius-top=".045" height=".73" position="-.95 .365 .46" color="#3a2212"></a-cone>
+      <a-cone radius-bottom=".025" radius-top=".045" height=".73" position=".95 .365 .46" color="#3a2212"></a-cone>
+      <a-cone radius-bottom=".025" radius-top=".045" height=".73" position="-.95 .365 -.46" color="#3a2212"></a-cone>
+      <a-cone radius-bottom=".025" radius-top=".045" height=".73" position=".95 .365 -.46" color="#3a2212"></a-cone>
+      <a-sphere radius=".03" position="-.95 .02 .46" color="#c9a24a"></a-sphere>
+      <a-sphere radius=".03" position=".95 .02 .46" color="#c9a24a"></a-sphere>
+      <a-sphere radius=".03" position="-.95 .02 -.46" color="#c9a24a"></a-sphere>
+      <a-sphere radius=".03" position=".95 .02 -.46" color="#c9a24a"></a-sphere>
+
+      <a-entity position="-.72 .80 .16" scale="1.25 1.25 1.25">
+        <a-cylinder radius=".055" height=".14" position="0 .07 0" color="#1e7d34"></a-cylinder>
+        <a-cylinder radius=".058" height=".018" position="0 .149 0" color="#14561f"></a-cylinder>
+        <a-cylinder radius=".057" height=".01" position="0 .005 0" color="#14561f"></a-cylinder>
+        <a-torus radius=".055" radius-tubular=".003" rotation="90 0 0" position="0 .125 0" color="#c9a24a"></a-torus>
+        <a-torus radius=".055" radius-tubular=".003" rotation="90 0 0" position="0 .02 0" color="#c9a24a"></a-torus>
+        <a-box width=".07" height=".045" depth=".004" position="0 .07 .0535" color="#ffffff"></a-box>
+        <a-text value="MILO" align="center" color="#1e7d34" width=".075" wrap-count="5"
+          position="0 .07 .0565"></a-text>
+      </a-entity>
+
+      <a-entity position="-.5 .80 .18" scale="1.25 1.25 1.25">
+        <a-cylinder radius=".045" height=".11" position="0 .055 0" color="#f8f4ea"></a-cylinder>
+        <a-cylinder radius=".047" height=".014" position="0 .117 0" color="#c0c0c0"></a-cylinder>
+        <a-cylinder radius=".046" height=".04" position="0 .065 0" color="#d62828"></a-cylinder>
+        <a-text value="MILK" align="center" color="#ffffff" width=".075" wrap-count="5"
+          position="0 .065 .0475"></a-text>
+      </a-entity>
+
+      <a-entity cup scale="1.3 1.3 1.3" position=".05 .80 .37"></a-entity>
+      <a-entity cup scale="1.3 1.3 1.3" position=".05 .80 -.37"></a-entity>
+      <a-entity cup scale="1.3 1.3 1.3" position=".92 .80 0"></a-entity>
+    </a-entity>
+
+    <a-entity chair position="0 0 .98"></a-entity>
+    <a-entity chair position="0 0 -.98" rotation="0 180 0"></a-entity>
+    <a-entity chair position="1.5 0 0" rotation="0 90 0"></a-entity>
+    <a-entity chair position="-1.5 0 0" rotation="0 -90 0"></a-entity>
+
+    <a-entity id="cam" camera="fov: 75; userHeight: 0" rig-controls></a-entity>
+  </a-scene>
+</body>
+</html>
